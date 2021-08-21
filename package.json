@@ -1,7 +1,8 @@
 {
-    "name": "pokemon-battle-sim",
+    "name": "typescript-teatime-particle-effects-obs-overlay",
     "version": "0.1.0",
-    "description": "Pokemon Battle Sim",
+    "description": "TypeScript Teatime Particle Effects OBS Overlay",
+    "license": "MIT",
     "scripts": {
         "prebuild": "del-cli build",
         "build": "webpack --mode production",
