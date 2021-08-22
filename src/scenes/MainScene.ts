@@ -53,7 +53,43 @@ export class MainScene extends Scene {
             this.cameras.main.setBackgroundColor("#1E1E1E");
             this.gui.add(this, "emitHellFires");
             this.gui.add(this, "emitStarshower");
+            this.gui.add(this, "slash");
         }
+    }
+
+    private slash() {
+        const shape = this.make
+            .graphics({
+                x: 0,
+                y: -1500,
+            })
+            .fillRect(0, 0, this.scale.width, 1500);
+        const mask = shape.createGeometryMask();
+        // mask.setInvertAlpha();
+        const slash = this.add.image(
+            this.scale.width / 2,
+            300,
+            "shapes", // TODO less pixelated asset
+            "slash_03"
+        );
+        slash
+            .setRotation(Phaser.Math.TAU / 4)
+            .setScale(10)
+            .setMask(mask);
+
+        const timeline = this.tweens.createTimeline();
+        timeline.add({
+            targets: [shape],
+            y: 0,
+            duration: 400,
+        });
+        timeline.add({
+            delay: 500,
+            targets: [shape],
+            y: 1500,
+            duration: 400,
+        });
+        timeline.play();
     }
 
     private makeEmitter(key: string) {
@@ -76,9 +112,8 @@ export class MainScene extends Scene {
         if (!username || banned.includes(username)) return;
         const msg = message.toLowerCase();
 
-        if (msg.includes("!fire")) {
-            return this.emitHellFires();
-        }
+        if (msg.includes("!fire")) return this.emitHellFires();
+
         if (
             msg.includes("!star") ||
             msg.includes("!starshower") ||
@@ -86,6 +121,9 @@ export class MainScene extends Scene {
         ) {
             return this.emitStarshower();
         }
+
+        if (msg.includes("!slash") || msg.includes("!slice"))
+            return this.slash();
     }
 
     private emitHellFires() {
