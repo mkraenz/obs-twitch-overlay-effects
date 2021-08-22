@@ -1,8 +1,8 @@
-// TODO make dev easy again
-export const isProd = window.location.hostname !== "localhost";
+export const isProd = true; // manually set true for production
 export const DEV = isProd
     ? {}
     : {
+          enabled: true,
           dontConnectToTwitch: true,
           enableSceneWatcher: false,
       };

@@ -1,3 +1,4 @@
+import { GUI } from "dat.gui";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
 import { DEV } from "../dev-config";
@@ -20,6 +21,7 @@ const banned = ["streamelements"];
 
 export class MainScene extends Scene {
     private tmiClient!: Client;
+    private gui!: GUI;
 
     public constructor() {
         super({
@@ -43,6 +45,15 @@ export class MainScene extends Scene {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         if (DEV.dontConnectToTwitch) this.tmiClient.connect();
         this.tmiClient.on("message", this.handleMessage.bind(this));
+
+        this.gui = new GUI();
+        this.gui.hide();
+        if (DEV.enabled) {
+            this.gui.show();
+            this.cameras.main.setBackgroundColor("#1E1E1E");
+            this.gui.add(this, "emitHellFires");
+            this.gui.add(this, "emitStarshower");
+        }
     }
 
     private makeEmitter(key: string) {
@@ -66,18 +77,27 @@ export class MainScene extends Scene {
         const msg = message.toLowerCase();
 
         if (msg.includes("!fire")) {
-            const emitter = this.makeEmitter("fire-effect");
-            this.time.delayedCall(oneMinute, () => emitter.destroy());
-            return;
+            return this.emitHellFires();
         }
         if (
             msg.includes("!star") ||
             msg.includes("!starshower") ||
             msg.includes("!stars")
         ) {
-            const emitter = this.makeEmitter("starshower-effect");
-            this.time.delayedCall(oneMinute, () => emitter.destroy());
-            return;
+            return this.emitStarshower();
         }
+    }
+
+    private emitHellFires() {
+        const emitter = this.makeEmitter("fire-effect");
+
+        if (DEV.enabled) emitter.setY(-80); // not in fullscreen in dev
+
+        this.time.delayedCall(oneMinute, () => emitter.destroy());
+    }
+
+    private emitStarshower() {
+        const emitter = this.makeEmitter("starshower-effect");
+        this.time.delayedCall(oneMinute, () => emitter.destroy());
     }
 }
