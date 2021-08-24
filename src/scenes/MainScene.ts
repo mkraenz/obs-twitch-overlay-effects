@@ -43,7 +43,7 @@ export class MainScene extends Scene {
     public create(): void {
         this.tmiClient = new Client(tmiConfig);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        if (DEV.dontConnectToTwitch) this.tmiClient.connect();
+        if (!DEV.dontConnectToTwitch) this.tmiClient.connect();
         this.tmiClient.on("message", this.handleMessage.bind(this));
 
         this.gui = new GUI();
