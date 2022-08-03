@@ -19,6 +19,10 @@ const tmiConfig = {
 
 const banned = ["streamelements"];
 
+let otherStaticPaths: {
+    familyGuyCssGif: string;
+};
+
 export class MainScene extends Scene {
     private tmiClient!: Client;
     private gui!: GUI;
@@ -37,7 +41,11 @@ export class MainScene extends Scene {
                 "assets/particles/shapes.json"
             )
             .text("fire-effect", "assets/particles/fire-at-bottom.json")
-            .text("starshower-effect", "assets/particles/starshower.json");
+            .text("starshower-effect", "assets/particles/starshower.json")
+            .audio("fanfare", "assets/sounds/teawars-fanfare.mp3");
+        otherStaticPaths = {
+            familyGuyCssGif: "assets/images/family-guy-css.gif",
+        };
     }
 
     public create(): void {
@@ -54,6 +62,7 @@ export class MainScene extends Scene {
             this.gui.add(this, "emitHellFires");
             this.gui.add(this, "emitStarshower");
             this.gui.add(this, "slash");
+            this.gui.add(this, "addCssFamilyGuy");
         }
     }
 
@@ -117,13 +126,39 @@ export class MainScene extends Scene {
         if (
             msg.includes("!star") ||
             msg.includes("!starshower") ||
-            msg.includes("!stars")
+            msg.includes("!stars") ||
+            msg.includes("!ice")
         ) {
             return this.emitStarshower();
+        }
+        if (msg.includes("!fanfare")) {
+            return this.playFanfare();
         }
 
         if (msg.includes("!slash") || msg.includes("!slice"))
             return this.slash();
+
+        if (msg.includes("!css")) {
+            return this.addCssFamilyGuy();
+        }
+    }
+
+    private addCssFamilyGuy() {
+        const animationDuration = 18600;
+        const familyGuy = document.createElement("img");
+        familyGuy.src = otherStaticPaths.familyGuyCssGif;
+        familyGuy.width = 250;
+        familyGuy.setAttribute(
+            "style",
+            "position: absolute; top: 50; left: 50;"
+        );
+        const element = document.body.appendChild(familyGuy);
+        this.time.delayedCall(animationDuration, () => element.remove());
+    }
+
+    private playFanfare() {
+        this.sound.stopAll();
+        this.sound.play("fanfare", { volume: 0.5 });
     }
 
     private emitHellFires() {
