@@ -1,14 +1,14 @@
 import { random, sample } from "lodash";
 import { GameObjects, Scene } from "phaser";
+import ms = require("ms");
 
 const ssample = (array: string[]) => sample(array)!;
 
 const anims = ["walk", "idle", "eyes", "laugh"];
 const Cfg = {
-    // TODO change to sth more reasonable
-    initialTimeToNextAnim: 1000,
-    timeToNextAnimMin: 1000,
-    timeToNextAnimMax: 5000,
+    initialTimeToNextAnim: ms("5 second"),
+    timeToNextAnimMin: ms("1 second"),
+    timeToNextAnimMax: ms("5 seconds"),
 };
 
 export class Neko extends GameObjects.Sprite {
