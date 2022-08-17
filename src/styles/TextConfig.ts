@@ -15,3 +15,8 @@ export const TextConfig: { [key in "md" | "debug"]: Style } = {
         color: Color.HackerGreen,
     },
 };
+
+export const setTextShadow = (text: GameObjects.Text) => {
+    text.setStroke(text.style.color, 1.3);
+    text.setShadow(2, 2, "#000000", 2, true, true);
+};

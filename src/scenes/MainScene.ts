@@ -1,6 +1,7 @@
 import { GUI } from "dat.gui";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
+import { DiceRoll } from "../components/DiceRoll";
 import { DEV } from "../dev-config";
 import { Scenes } from "./Scenes";
 
@@ -63,6 +64,8 @@ export class MainScene extends Scene {
             this.gui.add(this, "emitStarshower");
             this.gui.add(this, "slash");
             this.gui.add(this, "addCssFamilyGuy");
+            this.gui.add(this, "playFanfare");
+            this.gui.add(this, "debugRollDice");
         }
     }
 
@@ -141,6 +144,10 @@ export class MainScene extends Scene {
         if (msg.includes("!css")) {
             return this.addCssFamilyGuy();
         }
+
+        if (/^!roll [1-9]\d*$/.test(msg)) {
+            return this.rollDice(msg);
+        }
     }
 
     private addCssFamilyGuy() {
@@ -172,5 +179,14 @@ export class MainScene extends Scene {
     private emitStarshower() {
         const emitter = this.makeEmitter("starshower-effect");
         this.time.delayedCall(oneMinute, () => emitter.destroy());
+    }
+
+    /** @example diceRoll('!roll 100') roles a d100 */
+    private rollDice(msg: string) {
+        new DiceRoll(this, msg);
+    }
+
+    private debugRollDice() {
+        this.rollDice("!roll 20");
     }
 }
