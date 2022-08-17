@@ -1,6 +1,7 @@
 import { GUI } from "dat.gui";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
+import { ChatterTracker } from "../components/ChatterTracker";
 import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
@@ -29,6 +30,7 @@ export class MainScene extends Scene {
     private tmiClient!: Client;
     private gui!: GUI;
     private cats: Neko[] = [];
+    private chatterTracker!: ChatterTracker;
 
     public constructor() {
         super({
@@ -45,22 +47,23 @@ export class MainScene extends Scene {
             )
             .text("fire-effect", "assets/particles/fire-at-bottom.json")
             .text("starshower-effect", "assets/particles/starshower.json")
+            // .image("textbox", "assets/images/textbox.png")
             .audio("fanfare", "assets/sounds/teawars-fanfare.mp3")
             .audio("diceroll", "assets/sounds/diceroll.mp3")
             .aseprite({
-                key: "aoi",
-                textureURL: "assets/images/aoi.png",
-                atlasURL: "assets/images/aoi.json",
+                key: "ao",
+                textureURL: "assets/images/ao.png",
+                atlasURL: "assets/images/ao.json",
             })
             .aseprite({
                 key: "pink",
                 textureURL: "assets/images/pink.png",
-                atlasURL: "assets/images/aoi.json",
+                atlasURL: "assets/images/ao.json",
             })
             .aseprite({
                 key: "midori",
                 textureURL: "assets/images/midori.png",
-                atlasURL: "assets/images/aoi.json",
+                atlasURL: "assets/images/ao.json",
             });
         otherStaticPaths = {
             familyGuyCssGif: "assets/images/family-guy-css.gif",
@@ -77,20 +80,21 @@ export class MainScene extends Scene {
         this.gui.hide();
         if (DEV.enabled) {
             this.gui.show();
-            this.cameras.main.setBackgroundColor("#1E1E1E");
+            // this.cameras.main.setBackgroundColor("#1E1E1E");
             this.gui.add(this, "emitHellFires");
             this.gui.add(this, "emitStarshower");
             this.gui.add(this, "slash");
             this.gui.add(this, "addCssFamilyGuy");
             this.gui.add(this, "playFanfare");
             this.gui.add(this, "debugRollDice");
+            this.gui.add(this, "debugSayHi");
         }
         this.cats.push(
             new Neko(
                 this,
                 this.scale.width / 2 + 150,
                 this.scale.height - 132,
-                "aoi",
+                "ao",
                 { viewDirection: "right" }
             ),
             new Neko(
@@ -107,6 +111,7 @@ export class MainScene extends Scene {
                 "pink"
             )
         );
+        this.chatterTracker = new ChatterTracker(this.cats);
     }
 
     public update(time: number, delta: number) {
@@ -165,8 +170,11 @@ export class MainScene extends Scene {
         if (self) return; // Ignore message by chatbot itself
 
         const username = tags.username;
+        const displayName = tags["display-name"];
         if (!username || banned.includes(username)) return;
         const msg = message.toLowerCase();
+
+        this.chatterTracker.UpsertChatter(displayName || username);
 
         if (msg.includes("!fire")) return this.emitHellFires();
 
@@ -232,5 +240,9 @@ export class MainScene extends Scene {
 
     private debugRollDice() {
         this.rollDice("!roll 20");
+    }
+
+    private debugSayHi() {
+        this.cats[0].sayHi("TypeScriptTeatime");
     }
 }

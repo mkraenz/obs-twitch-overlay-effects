@@ -5,6 +5,6 @@ export const DEV = isProd
     ? {}
     : {
           enabled: true,
-          dontConnectToTwitch: true,
+          dontConnectToTwitch: false,
           enableSceneWatcher: false,
       };

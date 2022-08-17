@@ -1,4 +1,5 @@
 import { Types } from "phaser";
+import { Plugin as NineSlicePlugin } from "phaser3-nineslice";
 import { DEV } from "./dev-config";
 import { MainScene } from "./scenes/MainScene";
 
@@ -32,7 +33,7 @@ export const gameConfig: Types.Core.GameConfig = {
     },
     transparent: true,
     plugins: {
-        global: [...DebugPlugins],
+        global: [NineSlicePlugin.DefaultCfg, ...DebugPlugins],
     },
     callbacks: {
         postBoot: (game) => {
