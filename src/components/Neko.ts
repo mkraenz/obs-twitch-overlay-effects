@@ -21,12 +21,14 @@ export class Neko extends GameObjects.Sprite {
         texture: "aoi" | "midori" | "pink",
         config?: {
             viewDirection?: "right";
+            /** default 3 */
+            scale?: number;
         }
     ) {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.anims.createFromAseprite(texture, undefined, this);
-        this.setScale(3);
+        this.setScale(config?.scale ?? 3);
         this.play({ key: "walk", repeat: -1 });
         if (config?.viewDirection === "right") this.setFlipX(true);
     }

@@ -91,17 +91,14 @@ export class MainScene extends Scene {
                 this.scale.height - 132,
                 "aoi",
                 { viewDirection: "right" }
-            )
-        );
-        this.cats.push(
+            ),
             new Neko(
                 this,
                 this.scale.width / 2 + 260,
                 this.scale.height - 150,
-                "midori"
-            ).setScale(2.9)
-        );
-        this.cats.push(
+                "midori",
+                { scale: 2.9 }
+            ),
             new Neko(
                 this,
                 this.scale.width / 2 + 350,
