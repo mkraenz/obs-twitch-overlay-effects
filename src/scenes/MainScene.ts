@@ -46,6 +46,7 @@ export class MainScene extends Scene {
             .text("fire-effect", "assets/particles/fire-at-bottom.json")
             .text("starshower-effect", "assets/particles/starshower.json")
             .audio("fanfare", "assets/sounds/teawars-fanfare.mp3")
+            .audio("diceroll", "assets/sounds/diceroll.mp3")
             .aseprite({
                 key: "aoi",
                 textureURL: "assets/images/aoi.png",

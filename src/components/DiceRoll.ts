@@ -36,6 +36,9 @@ export class DiceRoll extends GameObjects.Text {
             from: 5000,
             to: 0,
             ease: Phaser.Math.Easing.Expo.Out,
+            onStart: () => {
+                this.scene.sound.play("diceroll", { volume: 1 });
+            },
             onUpdate: () => {
                 const current = Math.floor(tween.getValue() / 200);
                 if (current < last) {
