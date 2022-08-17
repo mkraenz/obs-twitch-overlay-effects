@@ -2,6 +2,7 @@ import { GUI } from "dat.gui";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
 import { DiceRoll } from "../components/DiceRoll";
+import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
 import { Scenes } from "./Scenes";
 
@@ -27,6 +28,7 @@ let otherStaticPaths: {
 export class MainScene extends Scene {
     private tmiClient!: Client;
     private gui!: GUI;
+    private cats: Neko[] = [];
 
     public constructor() {
         super({
@@ -43,7 +45,22 @@ export class MainScene extends Scene {
             )
             .text("fire-effect", "assets/particles/fire-at-bottom.json")
             .text("starshower-effect", "assets/particles/starshower.json")
-            .audio("fanfare", "assets/sounds/teawars-fanfare.mp3");
+            .audio("fanfare", "assets/sounds/teawars-fanfare.mp3")
+            .aseprite({
+                key: "aoi",
+                textureURL: "assets/images/aoi.png",
+                atlasURL: "assets/images/aoi.json",
+            })
+            .aseprite({
+                key: "pink",
+                textureURL: "assets/images/pink.png",
+                atlasURL: "assets/images/aoi.json",
+            })
+            .aseprite({
+                key: "midori",
+                textureURL: "assets/images/midori.png",
+                atlasURL: "assets/images/aoi.json",
+            });
         otherStaticPaths = {
             familyGuyCssGif: "assets/images/family-guy-css.gif",
         };
@@ -67,6 +84,35 @@ export class MainScene extends Scene {
             this.gui.add(this, "playFanfare");
             this.gui.add(this, "debugRollDice");
         }
+        this.cats.push(
+            new Neko(
+                this,
+                this.scale.width / 2 + 150,
+                this.scale.height - 132,
+                "aoi",
+                { viewDirection: "right" }
+            )
+        );
+        this.cats.push(
+            new Neko(
+                this,
+                this.scale.width / 2 + 260,
+                this.scale.height - 150,
+                "midori"
+            ).setScale(2.9)
+        );
+        this.cats.push(
+            new Neko(
+                this,
+                this.scale.width / 2 + 350,
+                this.scale.height - 130,
+                "pink"
+            )
+        );
+    }
+
+    public update(time: number, delta: number) {
+        this.cats.forEach((c) => c.update(time, delta));
     }
 
     private slash() {
