@@ -6,8 +6,9 @@ import replaceColor from "replace-color-ts";
 // console.log(replaceColor)
 
 const main = async () => {
-    // light blue #3f3f74 -> light green #4b692f
+    // light blue-> light green
     const midori1 = await replaceColor({
+        // path relative to where the script is run from
         image: "./assets/images/ao.png",
         colors: {
             type: "hex",
@@ -15,7 +16,7 @@ const main = async () => {
             replaceColor: "#99E550", // new color to replace with
         },
     });
-    // dark blue #3f3f74 -> dark green #4b692f
+    // dark blue -> dark green
     const midori2 = await replaceColor({
         image: midori1,
         colors: {
