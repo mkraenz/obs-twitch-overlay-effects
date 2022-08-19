@@ -1,6 +1,9 @@
-// @ts-nocheck
+// import * as replaceColor2 from "replace-color-ts";
+import replaceColor from "replace-color-ts";
 
-const replaceColor = require("replace-color");
+// testing my own package replace-color-ts
+// console.log(replaceColor2)
+// console.log(replaceColor)
 
 const main = async () => {
     // light blue #3f3f74 -> light green #4b692f

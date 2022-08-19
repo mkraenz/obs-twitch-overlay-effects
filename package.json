@@ -40,7 +40,7 @@
         "lint-staged": "^10.2.11",
         "phaser-plugin-scene-watcher": "^6.0.0",
         "prettier": "^2.3.2",
-        "replace-color": "^2.3.0",
+        "replace-color-ts": "^2.4.6",
         "ts-loader": "7.0.4",
         "ts-node": "^8.10.2",
         "typescript": "4.x",
