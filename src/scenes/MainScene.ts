@@ -180,16 +180,17 @@ export class MainScene extends Scene {
         if (!username || banned.includes(username)) return;
         const msg = message.toLowerCase();
 
-        this.chatterTracker.UpsertChatter(displayName || username);
+        this.chatterTracker.UpsertChatter(username, displayName || username);
         this.chatterTracker.handleChatMessage(msg);
 
         if (msg.includes("!fire")) return this.emitHellFires();
 
         if (
             msg.includes("!star") ||
-            msg.includes("!starshower") ||
             msg.includes("!stars") ||
-            msg.includes("!ice")
+            msg.includes("!starshower") ||
+            msg.includes("!ice") ||
+            msg.includes("!snow")
         ) {
             return this.emitStarshower();
         }
@@ -202,6 +203,10 @@ export class MainScene extends Scene {
 
         if (msg.includes("!css")) {
             return this.addCssFamilyGuy();
+        }
+
+        if (username === "typescriptteatime" && msg === "!goodbye") {
+            this.cats[1].sayGoodbye();
         }
 
         if (/^!roll [1-9]\d*$/.test(msg)) {
