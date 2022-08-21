@@ -76,6 +76,9 @@ export class MainScene extends Scene {
         if (!DEV.dontConnectToTwitch) this.tmiClient.connect();
         this.tmiClient.on("message", this.handleMessage.bind(this));
 
+        this.addCats();
+        this.chatterTracker = new ChatterTracker(this.cats);
+
         this.gui = new GUI();
         this.gui.hide();
         if (DEV.enabled) {
@@ -88,7 +91,15 @@ export class MainScene extends Scene {
             this.gui.add(this, "playFanfare");
             this.gui.add(this, "debugRollDice");
             this.gui.add(this, "debugSayHi");
+            this.gui.addFolder("Ao").add(this.cats[0], "beShocked");
         }
+    }
+
+    public update(time: number, delta: number) {
+        this.cats.forEach((c) => c.update(time, delta));
+    }
+
+    private addCats() {
         this.cats.push(
             new Neko(
                 this,
@@ -111,11 +122,6 @@ export class MainScene extends Scene {
                 "pink"
             )
         );
-        this.chatterTracker = new ChatterTracker(this.cats);
-    }
-
-    public update(time: number, delta: number) {
-        this.cats.forEach((c) => c.update(time, delta));
     }
 
     private slash() {
@@ -175,6 +181,7 @@ export class MainScene extends Scene {
         const msg = message.toLowerCase();
 
         this.chatterTracker.UpsertChatter(displayName || username);
+        this.chatterTracker.handleChatMessage(msg);
 
         if (msg.includes("!fire")) return this.emitHellFires();
 

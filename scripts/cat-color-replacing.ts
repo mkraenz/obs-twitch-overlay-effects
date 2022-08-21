@@ -1,9 +1,4 @@
-// import * as replaceColor2 from "replace-color-ts";
 import replaceColor from "replace-color-ts";
-
-// testing my own package replace-color-ts
-// console.log(replaceColor2)
-// console.log(replaceColor)
 
 const main = async () => {
     // light blue-> light green

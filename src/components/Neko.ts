@@ -1,9 +1,22 @@
 import { random, sample } from "lodash";
-import { GameObjects, Scene } from "phaser";
-import ms = require("ms");
+import ms from "ms";
+import { GameObjects, Scene, Types } from "phaser";
 
-const anims = ["walk", "idle", "eyes", "laugh"] as const;
-const specialAnims = ["talk"] as const;
+type AnimationKey =
+    | "idle"
+    | "laugh"
+    | "walk"
+    | "eyes"
+    | "laugh"
+    | "talk"
+    | "oh"
+    | "ohno";
+
+type AnimationConfig = Omit<Types.Animations.PlayAnimationConfig, "key"> & {
+    key: AnimationKey;
+};
+
+const anims = ["walk", "idle", "eyes", "laugh", "oh"] as const;
 const Cfg = {
     initialTimeToNextAnim: ms("5 second"),
     timeToNextAnimMin: ms("1 second"),
@@ -25,7 +38,7 @@ const greetings = [
 
 export class Neko extends GameObjects.Sprite {
     private timeToNextAnim = Cfg.initialTimeToNextAnim;
-    private isInSpecialAnimation = false;
+    private isInBlockingAnimation = false;
 
     constructor(
         scene: Scene,
@@ -42,14 +55,14 @@ export class Neko extends GameObjects.Sprite {
         scene.add.existing(this);
         scene.anims.createFromAseprite(texture, undefined, this);
         this.setScale(config?.scale ?? 3);
-        this.play({ key: "walk", repeat: -1 });
+        this.playAnim({ key: "walk" });
         if (config?.viewDirection === "right") this.setFlipX(true);
     }
 
     public update(time: number, delta: number) {
         this.timeToNextAnim -= delta;
-        if (!this.isInSpecialAnimation && this.timeToNextAnim < 0) {
-            this.play({ key: sample(anims)!, repeat: -1 });
+        if (!this.isInBlockingAnimation && this.timeToNextAnim < 0) {
+            this.playAnim({ key: sample(anims)!, repeat: -1 });
             this.timeToNextAnim = random(
                 Cfg.timeToNextAnimMin,
                 Cfg.timeToNextAnimMax
@@ -69,27 +82,67 @@ export class Neko extends GameObjects.Sprite {
         greeting.setStroke("black", 16);
         greeting.setShadow(2, 2, "#333333", 2, false, false);
 
+        // const dlg = this.scene.add.nineslice(
+        //     greeting.getCenter().x - 40,
+        //     greeting.getCenter().y - 20, // this is the starting x/y location
+        //     greeting.displayWidth + 40 * 2,
+        //     greeting.displayHeight + 20 * 2, // the width and height of your object
+        //     "textbox", // a key to an already loaded image
+        //     24, // the width and height to offset for a corner slice
+        //     2 // (optional) pixels to offset when computing the safe usage area
+        // );
+        // dlg.setOrigin(0.5, 0.5);
+        // greeting.setText("");
+
         const to = fullstring.length;
         this.scene.tweens.addCounter({
             duration: Cfg.greetingAnimDuration,
             from: 0,
             to,
             onStart: () => {
-                this.isInSpecialAnimation = true;
-                this.play({ key: specialAnims[0], repeat: -1 });
+                this.isInBlockingAnimation = true;
+                this.playAnim({ key: "talk" });
             },
             onComplete: () => {
-                this.isInSpecialAnimation = false;
+                this.isInBlockingAnimation = false;
                 greeting.destroy();
             },
             onUpdate: (_, { value }: { value: number }) => {
-                console.log("value", value);
+                // dlg.setDisplaySize(
+                //     greeting.getTopRight().x - greeting.getTopLeft().x - 40,
+                //     dlg.displayHeight
+                // );
                 greeting.setText(fullstring.substring(0, Math.floor(value)));
                 if (Math.ceil(value) === to) {
-                    this.play({ key: "idle" });
+                    this.playAnim({ key: "idle" });
                 }
             },
             hold: Cfg.greetingHoldDuration,
         });
+    }
+
+    public beShocked() {
+        if (!this.isInBlockingAnimation) {
+            const key = !!random(1) ? "ohno" : "oh";
+            this.playBlockingAnim({ key, duration: 5000 });
+        }
+    }
+
+    public laugh(): void {
+        if (!this.isInBlockingAnimation) {
+            this.playBlockingAnim({ key: "laugh", duration: 5000 });
+        }
+    }
+
+    private playBlockingAnim(options: AnimationConfig & { duration: number }) {
+        this.isInBlockingAnimation = true;
+        this.playAnim(options);
+        this.scene.time.delayedCall(options.duration, () => {
+            this.isInBlockingAnimation = false;
+        });
+    }
+
+    private playAnim(options: AnimationConfig) {
+        this.play({ repeat: -1, ...options });
     }
 }
