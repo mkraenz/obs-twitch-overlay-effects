@@ -168,6 +168,41 @@ export class Neko extends GameObjects.Sprite {
         });
     }
 
+    sayGoodbyeTo(displayName: string) {
+        const fullstring = `See you next time, ${displayName}.`;
+        const text = this.scene.add
+            .text(this.x, this.y - 200, "", {
+                fontFamily: "PressStart2P",
+                fontSize: "32px",
+                color: "white",
+            })
+            .setOrigin(0.5, 0);
+        text.setStroke("black", 16);
+        text.setShadow(2, 2, "#333333", 2, false, false);
+
+        const to = fullstring.length;
+        this.scene.tweens.addCounter({
+            duration: Cfg.greetingAnimDuration,
+            from: 0,
+            to,
+            onStart: () => {
+                this.isInBlockingAnimation = true;
+                this.playAnim({ key: "talk" });
+            },
+            onComplete: () => {
+                this.isInBlockingAnimation = false;
+                text.destroy();
+            },
+            onUpdate: (_, { value }: { value: number }) => {
+                text.setText(fullstring.substring(0, Math.floor(value)));
+                if (Math.ceil(value) === to) {
+                    this.playAnim({ key: "idle" });
+                }
+            },
+            hold: Cfg.greetingHoldDuration,
+        });
+    }
+
     private playBlockingAnim(options: AnimationConfig & { duration: number }) {
         this.isInBlockingAnimation = true;
         this.playAnim(options);

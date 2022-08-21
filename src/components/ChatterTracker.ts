@@ -3,13 +3,36 @@ import Sentiment from "sentiment";
 import { Neko } from "./Neko";
 
 const doNotSayHiTo = ["typescriptteatime"];
+const goodbyeSnippets = [
+    "goodbye",
+    "bye",
+    "cya",
+    "see ya",
+    "see you",
+    "ciao",
+    "byebye",
+    "gotta run",
+    "got to run",
+    "meeting coming up",
+];
+
 export class ChatterTracker {
     private chatters: string[] = [...doNotSayHiTo];
     private sentiment = new Sentiment();
 
     constructor(private readonly cats: Neko[]) {}
 
-    public UpsertChatter(username: string, displayName: string) {
+    public handleChatMessage(
+        msg: string,
+        username: string,
+        displayName?: string
+    ) {
+        this.upsertChatter(username, displayName || username);
+        this.makeCatsReactToChatMessage(msg);
+        this.handleChatGoodbye(msg, displayName || username);
+    }
+
+    private upsertChatter(username: string, displayName: string) {
         console.log(username);
         if (this.chatters.includes(username)) {
             return;
@@ -19,8 +42,10 @@ export class ChatterTracker {
         sample(this.cats)!.sayHi(displayName);
     }
 
-    public handleChatMessage(msg: string) {
-        this.makeCatsReactToChatMessage(msg);
+    public handleChatGoodbye(msg: string, displayName: string) {
+        if (goodbyeSnippets.some((snippet) => msg.includes(snippet))) {
+            sample(this.cats)!.sayGoodbyeTo(displayName);
+        }
     }
 
     private makeCatsReactToChatMessage(msg: string) {

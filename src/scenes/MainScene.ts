@@ -180,8 +180,7 @@ export class MainScene extends Scene {
         if (!username || banned.includes(username)) return;
         const msg = message.toLowerCase();
 
-        this.chatterTracker.UpsertChatter(username, displayName || username);
-        this.chatterTracker.handleChatMessage(msg);
+        this.chatterTracker.handleChatMessage(msg, username, displayName);
 
         if (msg.includes("!fire")) return this.emitHellFires();
 
