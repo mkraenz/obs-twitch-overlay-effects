@@ -2,7 +2,7 @@ import { sample } from "lodash";
 import Sentiment from "sentiment";
 import { Neko } from "./Neko";
 
-const doNotSayHiTo = ["typescriptteatime"];
+const ignoredUsernames = ["typescriptteatime"];
 const goodbyeSnippets = [
     "goodbye",
     "bye",
@@ -17,7 +17,7 @@ const goodbyeSnippets = [
 ];
 
 export class ChatterTracker {
-    private chatters: string[] = [...doNotSayHiTo];
+    private chatters: string[] = [...ignoredUsernames];
     private sentiment = new Sentiment();
 
     constructor(private readonly cats: Neko[]) {}
@@ -27,6 +27,7 @@ export class ChatterTracker {
         username: string,
         displayName?: string
     ) {
+        if (ignoredUsernames.includes(username)) return;
         this.upsertChatter(username, displayName || username);
         this.makeCatsReactToChatMessage(msg);
         this.handleChatGoodbye(msg, displayName || username);
