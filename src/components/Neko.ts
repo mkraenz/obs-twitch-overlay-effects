@@ -7,8 +7,10 @@ type AnimationKey =
     | "laugh"
     | "dance"
     | "eyes"
-    | "laugh"
     | "talk"
+    | "sit"
+    | "sit-sherlock"
+    | "blush"
     | "oh"
     | "ohno";
 
@@ -16,11 +18,19 @@ type AnimationConfig = Omit<Types.Animations.PlayAnimationConfig, "key"> & {
     key: AnimationKey;
 };
 
-const anims = ["dance", "idle", "eyes", "laugh", "oh"] as const;
+const anims: AnimationKey[] = [
+    "idle",
+    "laugh",
+    "dance",
+    "eyes",
+    "sit",
+    "sit-sherlock",
+    "blush",
+];
 const Cfg = {
     initialTimeToNextAnim: ms("5 second"),
-    timeToNextAnimMin: ms("1 second"),
-    timeToNextAnimMax: ms("5 seconds"),
+    timeToNextAnimMin: ms("3 second"),
+    timeToNextAnimMax: ms("20 seconds"),
     greetingAnimDuration: ms("2 seconds"),
     greetingHoldDuration: ms("5 seconds"),
     timeToNextCheezburgerMin: ms("1 hour"),
