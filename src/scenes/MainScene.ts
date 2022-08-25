@@ -113,7 +113,7 @@ export class MainScene extends Scene {
                 this.scale.width / 2 + 260,
                 this.scale.height - 150,
                 "midori",
-                { scale: 2.9 }
+                { scale: 2.9, lovesCheezburger: true }
             ),
             new Neko(
                 this,

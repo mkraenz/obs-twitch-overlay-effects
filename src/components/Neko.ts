@@ -23,6 +23,8 @@ const Cfg = {
     timeToNextAnimMax: ms("5 seconds"),
     greetingAnimDuration: ms("2 seconds"),
     greetingHoldDuration: ms("5 seconds"),
+    timeToNextCheezburgerMin: ms("1 hour"),
+    timeToNextCheezburgerMax: ms("3 hours"),
 };
 
 const greetings = [
@@ -38,7 +40,13 @@ const greetings = [
 
 export class Neko extends GameObjects.Sprite {
     private timeToNextAnim = Cfg.initialTimeToNextAnim;
+    private timeToNextCheezburger = random(
+        Cfg.timeToNextCheezburgerMin,
+        Cfg.timeToNextCheezburgerMax
+    );
+
     private isInBlockingAnimation = false;
+    private lovesCheezburger = false;
 
     constructor(
         scene: Scene,
@@ -49,6 +57,7 @@ export class Neko extends GameObjects.Sprite {
             viewDirection?: "right";
             /** default 3 */
             scale?: number;
+            lovesCheezburger?: boolean;
         }
     ) {
         super(scene, x, y, texture);
@@ -57,10 +66,14 @@ export class Neko extends GameObjects.Sprite {
         this.setScale(config?.scale ?? 3);
         this.playAnim({ key: "walk" });
         if (config?.viewDirection === "right") this.setFlipX(true);
+
+        this.lovesCheezburger = config?.lovesCheezburger || false;
     }
 
     public update(time: number, delta: number) {
         this.timeToNextAnim -= delta;
+        this.timeToNextCheezburger -= delta;
+
         if (!this.isInBlockingAnimation && this.timeToNextAnim < 0) {
             this.playAnim({ key: sample(anims)!, repeat: -1 });
             this.timeToNextAnim = random(
@@ -68,57 +81,18 @@ export class Neko extends GameObjects.Sprite {
                 Cfg.timeToNextAnimMax
             );
         }
-    }
 
-    public sayHi(username?: string) {
-        const fullstring = `${sample(greetings)!} ${username || "Twitch"}!`;
-        const greeting = this.scene.add
-            .text(this.x, this.y - 200, "", {
-                fontFamily: "PressStart2P",
-                fontSize: "32px",
-                color: "white",
-            })
-            .setOrigin(0.5, 0);
-        greeting.setStroke("black", 16);
-        greeting.setShadow(2, 2, "#333333", 2, false, false);
-
-        // const dlg = this.scene.add.nineslice(
-        //     greeting.getCenter().x - 40,
-        //     greeting.getCenter().y - 20, // this is the starting x/y location
-        //     greeting.displayWidth + 40 * 2,
-        //     greeting.displayHeight + 20 * 2, // the width and height of your object
-        //     "textbox", // a key to an already loaded image
-        //     24, // the width and height to offset for a corner slice
-        //     2 // (optional) pixels to offset when computing the safe usage area
-        // );
-        // dlg.setOrigin(0.5, 0.5);
-        // greeting.setText("");
-
-        const to = fullstring.length;
-        this.scene.tweens.addCounter({
-            duration: Cfg.greetingAnimDuration,
-            from: 0,
-            to,
-            onStart: () => {
-                this.isInBlockingAnimation = true;
-                this.playAnim({ key: "talk" });
-            },
-            onComplete: () => {
-                this.isInBlockingAnimation = false;
-                greeting.destroy();
-            },
-            onUpdate: (_, { value }: { value: number }) => {
-                // dlg.setDisplaySize(
-                //     greeting.getTopRight().x - greeting.getTopLeft().x - 40,
-                //     dlg.displayHeight
-                // );
-                greeting.setText(fullstring.substring(0, Math.floor(value)));
-                if (Math.ceil(value) === to) {
-                    this.playAnim({ key: "idle" });
-                }
-            },
-            hold: Cfg.greetingHoldDuration,
-        });
+        if (
+            this.lovesCheezburger &&
+            !this.isInBlockingAnimation &&
+            this.timeToNextCheezburger < 0
+        ) {
+            this.sayCheezburger();
+            this.timeToNextCheezburger = random(
+                Cfg.timeToNextCheezburgerMin,
+                Cfg.timeToNextCheezburgerMax
+            );
+        }
     }
 
     public beShocked() {
@@ -134,42 +108,34 @@ export class Neko extends GameObjects.Sprite {
         }
     }
 
+    public sayHi(username?: string) {
+        const fullstring = `${sample(greetings)!} ${username || "Twitch"}!`;
+        this.say(fullstring);
+    }
+
     public sayGoodbye() {
         const fullstring = `Until next time, hoomanz!`;
-        const goodbye = this.scene.add
-            .text(this.x, this.y - 200, "", {
-                fontFamily: "PressStart2P",
-                fontSize: "32px",
-                color: "white",
-            })
-            .setOrigin(0.5, 0);
-        goodbye.setStroke("black", 16);
-        goodbye.setShadow(2, 2, "#333333", 2, false, false);
+        this.say(fullstring, { autoRemove: false });
+    }
 
-        const to = fullstring.length;
-        this.scene.tweens.addCounter({
-            duration: Cfg.greetingAnimDuration,
-            from: 0,
-            to,
-            onStart: () => {
-                this.isInBlockingAnimation = true;
-                this.playAnim({ key: "talk" });
-            },
-            onComplete: () => {
-                this.isInBlockingAnimation = false;
-            },
-            onUpdate: (_, { value }: { value: number }) => {
-                goodbye.setText(fullstring.substring(0, Math.floor(value)));
-                if (Math.ceil(value) === to) {
-                    this.playAnim({ key: "idle" });
-                }
-            },
-            hold: Cfg.greetingHoldDuration,
+    public sayGoodbyeTo(displayName: string) {
+        this.say(`See you next time, ${displayName}.`);
+    }
+
+    public sayCheezburger() {
+        this.say("I Can Has Cheezburger?");
+    }
+
+    private playBlockingAnim(options: AnimationConfig & { duration: number }) {
+        this.isInBlockingAnimation = true;
+        this.playAnim(options);
+        this.scene.time.delayedCall(options.duration, () => {
+            this.isInBlockingAnimation = false;
         });
     }
 
-    sayGoodbyeTo(displayName: string) {
-        const fullstring = `See you next time, ${displayName}.`;
+    private say(phrase: string, options?: { autoRemove?: boolean }) {
+        const { autoRemove = true } = options || {};
         const text = this.scene.add
             .text(this.x, this.y - 200, "", {
                 fontFamily: "PressStart2P",
@@ -180,7 +146,7 @@ export class Neko extends GameObjects.Sprite {
         text.setStroke("black", 16);
         text.setShadow(2, 2, "#333333", 2, false, false);
 
-        const to = fullstring.length;
+        const to = phrase.length;
         this.scene.tweens.addCounter({
             duration: Cfg.greetingAnimDuration,
             from: 0,
@@ -191,23 +157,15 @@ export class Neko extends GameObjects.Sprite {
             },
             onComplete: () => {
                 this.isInBlockingAnimation = false;
-                text.destroy();
+                if (autoRemove) text.destroy();
             },
             onUpdate: (_, { value }: { value: number }) => {
-                text.setText(fullstring.substring(0, Math.floor(value)));
+                text.setText(phrase.substring(0, Math.floor(value)));
                 if (Math.ceil(value) === to) {
                     this.playAnim({ key: "idle" });
                 }
             },
             hold: Cfg.greetingHoldDuration,
-        });
-    }
-
-    private playBlockingAnim(options: AnimationConfig & { duration: number }) {
-        this.isInBlockingAnimation = true;
-        this.playAnim(options);
-        this.scene.time.delayedCall(options.duration, () => {
-            this.isInBlockingAnimation = false;
         });
     }
 
