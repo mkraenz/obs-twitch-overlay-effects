@@ -5,7 +5,7 @@ import { GameObjects, Scene, Types } from "phaser";
 type AnimationKey =
     | "idle"
     | "laugh"
-    | "walk"
+    | "dance"
     | "eyes"
     | "laugh"
     | "talk"
@@ -16,7 +16,7 @@ type AnimationConfig = Omit<Types.Animations.PlayAnimationConfig, "key"> & {
     key: AnimationKey;
 };
 
-const anims = ["walk", "idle", "eyes", "laugh", "oh"] as const;
+const anims = ["dance", "idle", "eyes", "laugh", "oh"] as const;
 const Cfg = {
     initialTimeToNextAnim: ms("5 second"),
     timeToNextAnimMin: ms("1 second"),
@@ -64,7 +64,7 @@ export class Neko extends GameObjects.Sprite {
         scene.add.existing(this);
         scene.anims.createFromAseprite(texture, undefined, this);
         this.setScale(config?.scale ?? 3);
-        this.playAnim({ key: "walk" });
+        this.playAnim({ key: "dance" });
         if (config?.viewDirection === "right") this.setFlipX(true);
 
         this.lovesCheezburger = config?.lovesCheezburger || false;

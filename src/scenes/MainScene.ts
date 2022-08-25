@@ -1,4 +1,5 @@
 import { GUI } from "dat.gui";
+import ms from "ms";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
 import { ChatterTracker } from "../components/ChatterTracker";
@@ -6,10 +7,6 @@ import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
 import { Scenes } from "./Scenes";
-
-const oneMinute = 60000;
-
-const cfg = {};
 
 const tmiConfig = {
     options: { debug: true },
@@ -47,7 +44,6 @@ export class MainScene extends Scene {
             )
             .text("fire-effect", "assets/particles/fire-at-bottom.json")
             .text("starshower-effect", "assets/particles/starshower.json")
-            // .image("textbox", "assets/images/textbox.png")
             .audio("fanfare", "assets/sounds/teawars-fanfare.mp3")
             .audio("diceroll", "assets/sounds/diceroll.mp3")
             .aseprite({
@@ -236,12 +232,12 @@ export class MainScene extends Scene {
 
         if (DEV.enabled) emitter.setY(-80); // not in fullscreen in dev
 
-        this.time.delayedCall(oneMinute, () => emitter.destroy());
+        this.time.delayedCall(ms("1 minute"), () => emitter.destroy());
     }
 
     private emitStarshower() {
         const emitter = this.makeEmitter("starshower-effect");
-        this.time.delayedCall(oneMinute, () => emitter.destroy());
+        this.time.delayedCall(ms("1 minute"), () => emitter.destroy());
     }
 
     /** @example diceRoll('!roll 100') roles a d100 */
