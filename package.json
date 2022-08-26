@@ -15,7 +15,7 @@
         "lint:prettier:fix": "prettier --write \"**/*.{graphql,json,md,yaml,yml}\"",
         "type-check": "tsc --noEmit",
         "sanity-check": "npm install && npm run dev",
-        "generate:cats": "node cat-color-replacing.js"
+        "generate:cats": "ts-node ./scripts/cat-color-replacing.ts"
     },
     "devDependencies": {
         "@types/dat.gui": "^0.7.7",
