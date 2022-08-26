@@ -1,6 +1,8 @@
 import { Types } from "phaser";
 import { DEV } from "./dev-config";
 import { MainScene } from "./scenes/MainScene";
+// @ts-expect-error
+import SceneWatcherPlugin from 'phaser-plugin-scene-watcher';
 
 interface IPlugin {
     key: string;
@@ -10,8 +12,7 @@ const isPlugin = (x: false | IPlugin): x is IPlugin => !!x;
 const DebugPlugins = [
     !!DEV.enableSceneWatcher && {
         key: "SceneWatcher",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        plugin: require("phaser-plugin-scene-watcher"),
+        plugin: SceneWatcherPlugin,
     },
 ].filter(isPlugin);
 

@@ -37,32 +37,28 @@ export class MainScene extends Scene {
 
     public preload() {
         this.load
-            .atlas(
-                "shapes",
-                "assets/particles/shapes.png",
-                "assets/particles/shapes.json"
-            )
-            .text("fire-effect", "assets/particles/fire-at-bottom.json")
-            .text("starshower-effect", "assets/particles/starshower.json")
-            .audio("fanfare", "assets/sounds/teawars-fanfare.mp3")
-            .audio("diceroll", "assets/sounds/diceroll.mp3")
+            .atlas("shapes", "particles/shapes.png", "particles/shapes.json")
+            .text("fire-effect", "particles/fire-at-bottom.json")
+            .text("starshower-effect", "particles/starshower.json")
+            .audio("fanfare", "sounds/teawars-fanfare.mp3")
+            .audio("diceroll", "sounds/diceroll.mp3")
             .aseprite({
                 key: "ao",
-                textureURL: "assets/images/ao.png",
-                atlasURL: "assets/images/ao.json",
+                textureURL: "images/ao.png",
+                atlasURL: "images/ao.json",
             })
             .aseprite({
                 key: "pink",
-                textureURL: "assets/images/pink.png",
-                atlasURL: "assets/images/ao.json",
+                textureURL: "images/pink.png",
+                atlasURL: "images/ao.json",
             })
             .aseprite({
                 key: "midori",
-                textureURL: "assets/images/midori.png",
-                atlasURL: "assets/images/ao.json",
+                textureURL: "images/midori.png",
+                atlasURL: "images/ao.json",
             });
         otherStaticPaths = {
-            familyGuyCssGif: "assets/images/family-guy-css.gif",
+            familyGuyCssGif: "images/family-guy-css.gif",
         };
     }
 
@@ -87,7 +83,9 @@ export class MainScene extends Scene {
             this.gui.add(this, "playFanfare");
             this.gui.add(this, "debugRollDice");
             this.gui.add(this, "debugSayHi");
-            this.gui.addFolder("Ao").add(this.cats[0], "beShocked");
+            const aoGui = this.gui.addFolder("Ao");
+            aoGui.add(this.cats[0], "beShocked");
+            aoGui.add(this.cats[0], "sayGoodbye");
         }
     }
 
@@ -216,7 +214,7 @@ export class MainScene extends Scene {
         familyGuy.width = 250;
         familyGuy.setAttribute(
             "style",
-            "position: absolute; top: 50; left: 50;"
+            "position: absolute; top: 50px; left: 50px;"
         );
         const element = document.body.appendChild(familyGuy);
         this.time.delayedCall(animationDuration, () => element.remove());
