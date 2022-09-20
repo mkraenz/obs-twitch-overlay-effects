@@ -93,7 +93,12 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
-            this.gui.add(this.cannonShot, "fire").name("Fire Cannon");
+            const cannonballMethods = {
+                emulateMessage: () => this.cannonShot.handleMessage("Peter"),
+            };
+            this.gui
+                .add(cannonballMethods, "emulateMessage")
+                .name("Cannonball: Emulate Message");
         }
     }
 
@@ -200,12 +205,7 @@ export class MainScene extends Scene {
         }
 
         if (msg.includes("!cannon")) {
-            if (!this.cannonShot.gameOngoing) {
-                return this.cannonShot.startGame(username);
-            }
-            if (this.cannonShot.isAiming) {
-                return this.cannonShot.fire();
-            }
+            this.cannonShot.handleMessage(displayName || username);
         }
 
         if (msg.includes("!slash") || msg.includes("!slice"))

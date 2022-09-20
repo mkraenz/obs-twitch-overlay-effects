@@ -3,21 +3,23 @@ import { GameObjects, Scene } from "phaser";
 const g = 9.81;
 const x0 = 100;
 const y0 = 500;
-const minV0 = 100;
-const maxV0 = 200;
+const minSpeed = 100;
+const maxSpeed = 150;
+const maxAlpha = Math.PI / 2;
 
 export class CannonShot extends Scene {
     private currentPlayer: string | null = null;
-    private alpha = (Math.random() / 2) * Math.PI; // 0 to 90 degrees
-    private speed = 100;
+    private alpha = 0; // 0 to 90 degrees
+    private speed = minSpeed;
     private circle!: GameObjects.Arc;
     private target!: GameObjects.Rectangle;
     private t = 0;
     private state: "not started" | "aiming" | "flying" | "landed" | "finished" =
         "not started";
-    private fired = false;
     private speedText!: GameObjects.Text;
     private alphaText!: GameObjects.Text;
+    private alphaBar!: GameObjects.Rectangle;
+    private speedBar!: GameObjects.Rectangle;
 
     constructor(key = "CannonShot") {
         super(key);
@@ -34,45 +36,66 @@ export class CannonShot extends Scene {
                 fontSize: "48px",
             });
         });
-        this.speedText = this.add.text(100, 50, "Speed", {
-            color: "#ff0000",
-            fontSize: "48px",
-        });
-        this.alphaText = this.add.text(100, 100, "Angle", {
-            color: "#ff0000",
-            fontSize: "48px",
-        });
-    }
-
-    public get isAiming() {
-        return this.currentPlayer !== null && !this.fired;
-    }
-
-    public get gameOngoing() {
-        return this.currentPlayer !== null;
+        this.speedText = this.add
+            .text(100, 50, "Speed", {
+                color: "#ff0000",
+                fontSize: "48px",
+            })
+            .setOrigin(0, 0.5);
+        this.alphaText = this.add
+            .text(100, 100, "Angle", {
+                color: "#ff0000",
+                fontSize: "48px",
+            })
+            .setOrigin(0, 0.5);
+        this.speedBar = this.add
+            .rectangle(300, 50, 200, 48, 0x00ff00)
+            .setOrigin(0, 0.5);
+        this.alphaBar = this.add
+            .rectangle(300, 100, 200, 48, 0x00ff00)
+            .setOrigin(0, 0.5);
     }
 
     public startGame(player: string) {
         this.currentPlayer = player;
+        this.state = "aiming";
+    }
+
+    public handleMessage(displayName: string) {
+        if (this.state === "not started" || this.state === "finished") {
+            return this.startGame(displayName);
+        }
+        if (this.currentPlayer !== displayName) {
+            // not the current player this ignore command
+            return;
+        }
+        if (this.state === "aiming") {
+            return this.fire();
+        }
     }
 
     public fire() {
-        this.fired = true;
+        this.state = "flying";
     }
 
     // https://de.wikipedia.org/wiki/Wurfparabel
     // x(t) = v0 * cos(alpha) * t
     // y(t) = v0 * sin(alpha) * t - 1/2 * g * t^2
     public update(timeSinceStart: number, delta: number): void {
-        if (this.isAiming) {
-            this.speed = ((this.speed + 1) % (maxV0 - minV0)) + minV0;
+        if (this.state === "aiming") {
+            this.speed = ((this.speed + 1) % (maxSpeed - minSpeed)) + minSpeed;
             this.alpha = (this.alpha + 0.01) % (Math.PI / 2);
-            this.alphaText.setText(`Angle: ${this.alpha}`);
-            this.speedText.setText(`Speed: ${this.speed}`);
+            this.alphaBar.setScale(this.alpha / maxAlpha, 1);
+            this.speedBar.setScale(
+                (this.speed - minSpeed) / (maxSpeed - minSpeed),
+                1
+            );
+            // this.alphaText.setText(`Angle ${this.alpha}`);
+            // this.speedText.setText(`Speed ${this.speed}`);
         }
 
         const inTheAir = this.circle.y <= y0 + 1;
-        if (this.fired && inTheAir) {
+        if (this.state === "flying" && inTheAir) {
             this.t += delta / 100;
             const xt = x0 + this.speed * Math.cos(this.alpha) * this.t;
             const yt =
@@ -81,6 +104,17 @@ export class CannonShot extends Scene {
                     0.5 * g * Math.pow(this.t, 2));
             this.circle.setX(xt);
             this.circle.setY(yt);
+        }
+        const landed = this.circle.y >= y0 + 1;
+
+        if (this.state === "flying" && landed) {
+            this.state = "landed";
+            // TODO: show winner
+            this.time.delayedCall(5000, () => {
+                this.state = "finished";
+                // TODO: cleanup
+                this.circle.setPosition(x0, y0);
+            });
         }
     }
 }
