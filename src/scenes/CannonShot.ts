@@ -20,6 +20,7 @@ export class CannonShot extends Scene {
     private angleText!: GameObjects.Text;
     private angleBar!: GameObjects.Rectangle;
     private speedBar!: GameObjects.Rectangle;
+    private resultText!: GameObjects.Text;
 
     constructor(key = "CannonShot") {
         super(key);
@@ -31,11 +32,14 @@ export class CannonShot extends Scene {
         this.target = this.add.rectangle(1000, y0, 100, 10, 0x00ff00);
         this.physics.add.existing(this.target);
         this.physics.add.collider(this.circle, this.target, () => {
-            this.add.text(100, 150, "HIT!", {
+            this.resultText.setVisible(true);
+        });
+        this.resultText = this.add
+            .text(100, 150, "HIT!", {
                 color: "#ff0000",
                 fontSize: "48px",
-            });
-        });
+            })
+            .setVisible(false);
         this.speedText = this.add
             .text(100, 50, "Speed", {
                 color: "#ff0000",
@@ -78,18 +82,21 @@ export class CannonShot extends Scene {
         this.state = "flying";
     }
 
+    private updateBars() {
+        this.speed = ((this.speed + 1) % (maxSpeed - minSpeed)) + minSpeed;
+        this.angle = (this.angle + 0.01) % (Math.PI / 2);
+        this.angleBar.setScale(this.angle / maxAngle, 1);
+        this.speedBar.setScale(
+            (this.speed - minSpeed) / (maxSpeed - minSpeed),
+            1
+        );
+    }
     // https://de.wikipedia.org/wiki/Wurfparabel
     // x(t) = v0 * cos(alpha) * t
     // y(t) = v0 * sin(alpha) * t - 1/2 * g * t^2
     public update(timeSinceStart: number, delta: number): void {
         if (this.state === "aiming") {
-            this.speed = ((this.speed + 1) % (maxSpeed - minSpeed)) + minSpeed;
-            this.angle = (this.angle + 0.01) % (Math.PI / 2);
-            this.angleBar.setScale(this.angle / maxAngle, 1);
-            this.speedBar.setScale(
-                (this.speed - minSpeed) / (maxSpeed - minSpeed),
-                1
-            );
+            this.updateBars();
             // this.angleText.setText(`Angle ${this.angle}`);
             // this.speedText.setText(`Speed ${this.speed}`);
         }
@@ -110,11 +117,20 @@ export class CannonShot extends Scene {
         if (this.state === "flying" && landed) {
             this.state = "landed";
             // TODO: show winner
-            this.time.delayedCall(5000, () => {
+            this.time.delayedCall(7000, () => {
                 this.state = "finished";
-                // TODO: cleanup
-                this.circle.setPosition(x0, y0);
+                this.resetValues();
             });
         }
+    }
+
+    public resetValues() {
+        this.circle.setPosition(x0, y0);
+        this.t = 0;
+        this.angle = 0;
+        this.speed = minSpeed;
+        this.resultText.setVisible(false);
+        this.angleBar.setScale(1);
+        this.speedBar.setScale(1);
     }
 }
