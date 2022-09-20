@@ -29,6 +29,7 @@ export class MainScene extends Scene {
     private gui!: GUI;
     private cats: Neko[] = [];
     private chatterTracker!: ChatterTracker;
+    private cannonShot!: CannonShot;
 
     public constructor() {
         super({
@@ -71,7 +72,11 @@ export class MainScene extends Scene {
 
         this.addCats();
         this.chatterTracker = new ChatterTracker(this.cats);
-        const cannonShot = this.scene.add("CannonShot", CannonShot, true);
+        this.cannonShot = this.scene.add(
+            "CannonShot",
+            CannonShot,
+            true
+        ) as CannonShot;
 
         this.gui = new GUI();
         this.gui.hide();
@@ -88,6 +93,7 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
+            this.gui.add(this.cannonShot, "fire").name("Fire Cannon");
         }
     }
 
@@ -193,6 +199,15 @@ export class MainScene extends Scene {
             return this.playFanfare();
         }
 
+        if (msg.includes("!cannon")) {
+            if (!this.cannonShot.gameOngoing) {
+                return this.cannonShot.startGame(username);
+            }
+            if (this.cannonShot.isAiming) {
+                return this.cannonShot.fire();
+            }
+        }
+
         if (msg.includes("!slash") || msg.includes("!slice"))
             return this.slash();
 
@@ -200,7 +215,10 @@ export class MainScene extends Scene {
             return this.addCssFamilyGuy();
         }
 
-        if (username === "typescriptteatime" && msg === "!goodbye") {
+        if (
+            username === "typescriptteatime" &&
+            (msg === "!bb" || msg === "!bye" || msg === "!goodbye")
+        ) {
             this.cats[1].sayGoodbye();
         }
 
