@@ -5,11 +5,11 @@ const x0 = 100;
 const y0 = 500;
 const minSpeed = 100;
 const maxSpeed = 150;
-const maxAlpha = Math.PI / 2;
+const maxAngle = Math.PI / 2;
 
 export class CannonShot extends Scene {
     private currentPlayer: string | null = null;
-    private alpha = 0; // 0 to 90 degrees
+    private angle = 0; // 0 to 90 degrees
     private speed = minSpeed;
     private circle!: GameObjects.Arc;
     private target!: GameObjects.Rectangle;
@@ -17,8 +17,8 @@ export class CannonShot extends Scene {
     private state: "not started" | "aiming" | "flying" | "landed" | "finished" =
         "not started";
     private speedText!: GameObjects.Text;
-    private alphaText!: GameObjects.Text;
-    private alphaBar!: GameObjects.Rectangle;
+    private angleText!: GameObjects.Text;
+    private angleBar!: GameObjects.Rectangle;
     private speedBar!: GameObjects.Rectangle;
 
     constructor(key = "CannonShot") {
@@ -42,7 +42,7 @@ export class CannonShot extends Scene {
                 fontSize: "48px",
             })
             .setOrigin(0, 0.5);
-        this.alphaText = this.add
+        this.angleText = this.add
             .text(100, 100, "Angle", {
                 color: "#ff0000",
                 fontSize: "48px",
@@ -51,7 +51,7 @@ export class CannonShot extends Scene {
         this.speedBar = this.add
             .rectangle(300, 50, 200, 48, 0x00ff00)
             .setOrigin(0, 0.5);
-        this.alphaBar = this.add
+        this.angleBar = this.add
             .rectangle(300, 100, 200, 48, 0x00ff00)
             .setOrigin(0, 0.5);
     }
@@ -84,23 +84,23 @@ export class CannonShot extends Scene {
     public update(timeSinceStart: number, delta: number): void {
         if (this.state === "aiming") {
             this.speed = ((this.speed + 1) % (maxSpeed - minSpeed)) + minSpeed;
-            this.alpha = (this.alpha + 0.01) % (Math.PI / 2);
-            this.alphaBar.setScale(this.alpha / maxAlpha, 1);
+            this.angle = (this.angle + 0.01) % (Math.PI / 2);
+            this.angleBar.setScale(this.angle / maxAngle, 1);
             this.speedBar.setScale(
                 (this.speed - minSpeed) / (maxSpeed - minSpeed),
                 1
             );
-            // this.alphaText.setText(`Angle ${this.alpha}`);
+            // this.angleText.setText(`Angle ${this.angle}`);
             // this.speedText.setText(`Speed ${this.speed}`);
         }
 
         const inTheAir = this.circle.y <= y0 + 1;
         if (this.state === "flying" && inTheAir) {
             this.t += delta / 100;
-            const xt = x0 + this.speed * Math.cos(this.alpha) * this.t;
+            const xt = x0 + this.speed * Math.cos(this.angle) * this.t;
             const yt =
                 y0 -
-                (this.speed * Math.sin(this.alpha) * this.t -
+                (this.speed * Math.sin(this.angle) * this.t -
                     0.5 * g * Math.pow(this.t, 2));
             this.circle.setX(xt);
             this.circle.setY(yt);
