@@ -2,7 +2,7 @@ import { Types } from "phaser";
 import { DEV } from "./dev-config";
 import { MainScene } from "./scenes/MainScene";
 // @ts-expect-error
-import SceneWatcherPlugin from 'phaser-plugin-scene-watcher';
+import SceneWatcherPlugin from "phaser-plugin-scene-watcher";
 
 interface IPlugin {
     key: string;
@@ -23,6 +23,12 @@ export const gameConfig: Types.Core.GameConfig = {
         createContainer: true,
     },
     pixelArt: true,
+    physics: {
+        default: "arcade",
+        arcade: {
+            debug: true,
+        },
+    },
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,

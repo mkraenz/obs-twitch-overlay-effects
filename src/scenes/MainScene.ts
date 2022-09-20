@@ -6,6 +6,7 @@ import { ChatterTracker } from "../components/ChatterTracker";
 import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
+import { CannonShot } from "./CannonShot";
 import { Scenes } from "./Scenes";
 
 const tmiConfig = {
@@ -70,6 +71,7 @@ export class MainScene extends Scene {
 
         this.addCats();
         this.chatterTracker = new ChatterTracker(this.cats);
+        const cannonShot = this.scene.add("CannonShot", CannonShot, true);
 
         this.gui = new GUI();
         this.gui.hide();
