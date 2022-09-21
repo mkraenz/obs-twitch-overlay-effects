@@ -6,14 +6,32 @@ const y0 = 500;
 const minSpeed = 100;
 const maxSpeed = 150;
 const maxAngle = Math.PI / 2;
+const angleStep = 0.01;
+
+const plusMinusOneStepFunction = (angle: number) => {
+    // console.log(t * 1000);
+    // console.log((t * 1000) % (maxAngle * 1000));
+    const res =
+        (angle * 1000) % (maxAngle * 2 * 1000) < maxAngle * 1000 ? 1 : -1;
+    console.log({
+        ang: angle * 1000,
+        maxAng: maxAngle * 2 * 1000,
+        mod: (angle * 1000) % (maxAngle * 2 * 1000),
+        res,
+    });
+    // console.log(res);
+    return res;
+};
 
 export class CannonShot extends Scene {
     private currentPlayer: string | null = null;
     private angle = 0; // 0 to 90 degrees
+    private totalAngle = 0;
     private speed = minSpeed;
     private circle!: GameObjects.Arc;
     private target!: GameObjects.Rectangle;
-    private t = 0;
+    private tFlying = 0;
+    private tAim = 0;
     private state: "not started" | "aiming" | "flying" | "landed" | "finished" =
         "not started";
     private speedText!: GameObjects.Text;
@@ -60,9 +78,11 @@ export class CannonShot extends Scene {
             .rectangle(300, 100, 200, 48, 0x00ff00)
             .setOrigin(0, 0.5);
         this.cannonPipe = this.add
-            .image(x0, y0 + 120, "cannon-pipe")
-            .setOrigin(0.5, 1);
-        this.add.image(x0, y0 + 100, "cannon-stand");
+            .image(x0, y0 + 20, "cannon-pipe")
+            .setFlipX(true)
+            .setOrigin(0.5, 1)
+            .setRotation(Math.PI / 2); // start lying
+        this.add.image(x0, y0, "cannon-stand");
     }
 
     public startGame(player: string) {
@@ -87,9 +107,11 @@ export class CannonShot extends Scene {
         this.state = "flying";
     }
 
-    private updateBars() {
+    private updateBars(deltaT: number) {
         this.speed = ((this.speed + 1) % (maxSpeed - minSpeed)) + minSpeed;
-        this.angle = (this.angle + 0.01) % (Math.PI / 2);
+        this.totalAngle += angleStep;
+        this.angle =
+            this.angle + angleStep * plusMinusOneStepFunction(this.totalAngle);
         this.angleBar.setScale(this.angle / maxAngle, 1);
         this.speedBar.setScale(
             (this.speed - minSpeed) / (maxSpeed - minSpeed),
@@ -101,20 +123,20 @@ export class CannonShot extends Scene {
     // y(t) = v0 * sin(alpha) * t - 1/2 * g * t^2
     public update(timeSinceStart: number, delta: number): void {
         if (this.state === "aiming") {
-            this.updateBars();
-            this.cannonPipe.setRotation(this.angle);
+            this.updateBars(delta);
+            this.cannonPipe.setRotation(Math.PI / 2 - this.angle);
             // this.angleText.setText(`Angle ${this.angle}`);
             // this.speedText.setText(`Speed ${this.speed}`);
         }
 
         const inTheAir = this.circle.y <= y0 + 1;
         if (this.state === "flying" && inTheAir) {
-            this.t += delta / 100;
-            const xt = x0 + this.speed * Math.cos(this.angle) * this.t;
+            this.tFlying += delta / 100;
+            const xt = x0 + this.speed * Math.cos(this.angle) * this.tFlying;
             const yt =
                 y0 -
-                (this.speed * Math.sin(this.angle) * this.t -
-                    0.5 * g * Math.pow(this.t, 2));
+                (this.speed * Math.sin(this.angle) * this.tFlying -
+                    0.5 * g * Math.pow(this.tFlying, 2));
             this.circle.setX(xt);
             this.circle.setY(yt);
         }
@@ -132,11 +154,14 @@ export class CannonShot extends Scene {
 
     public resetValues() {
         this.circle.setPosition(x0, y0);
-        this.t = 0;
+        this.tFlying = 0;
+        this.tAim = 0;
         this.angle = 0;
         this.speed = minSpeed;
         this.resultText.setVisible(false);
         this.angleBar.setScale(1);
         this.speedBar.setScale(1);
+        this.cannonPipe.setRotation(Math.PI / 2);
+        this.totalAngle = 0;
     }
 }
