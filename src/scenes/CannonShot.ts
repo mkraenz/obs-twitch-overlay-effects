@@ -21,6 +21,7 @@ export class CannonShot extends Scene {
     private angleBar!: GameObjects.Rectangle;
     private speedBar!: GameObjects.Rectangle;
     private resultText!: GameObjects.Text;
+    private cannonPipe!: GameObjects.Image;
 
     constructor(key = "CannonShot") {
         super(key);
@@ -58,6 +59,10 @@ export class CannonShot extends Scene {
         this.angleBar = this.add
             .rectangle(300, 100, 200, 48, 0x00ff00)
             .setOrigin(0, 0.5);
+        this.cannonPipe = this.add
+            .image(x0, y0 + 120, "cannon-pipe")
+            .setOrigin(0.5, 1);
+        this.add.image(x0, y0 + 100, "cannon-stand");
     }
 
     public startGame(player: string) {
@@ -97,6 +102,7 @@ export class CannonShot extends Scene {
     public update(timeSinceStart: number, delta: number): void {
         if (this.state === "aiming") {
             this.updateBars();
+            this.cannonPipe.setRotation(this.angle);
             // this.angleText.setText(`Angle ${this.angle}`);
             // this.speedText.setText(`Speed ${this.speed}`);
         }
