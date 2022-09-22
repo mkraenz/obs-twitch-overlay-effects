@@ -58,10 +58,7 @@ export class MainScene extends Scene {
                 key: "midori",
                 textureURL: "images/midori.png",
                 atlasURL: "images/ao.json",
-            })
-            .image("cannonball", "images/cannonball.png")
-            .image("cannon-pipe", "images/cannon-pipe.png")
-            .image("cannon-stand", "images/cannon-stand.png");
+            });
         otherStaticPaths = {
             familyGuyCssGif: "images/family-guy-css.gif",
         };

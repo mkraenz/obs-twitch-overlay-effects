@@ -35,6 +35,15 @@ export class Cannon extends Scene {
         super(key);
     }
 
+    public preload() {
+        this.load
+            .image("cannonball", "images/cannonball.png")
+            .image("cannon-pipe", "images/cannon-pipe.png")
+            .image("cannon-stand", "images/cannon-stand.png")
+            .audio("cannon-shot", "sounds/cannon_fire.mp3")
+            .audio("cannon-hit", "sounds/cannon_hit_wall_no_splash.mp3");
+    }
+
     public create() {
         this.physics.world.gravity.y = 98.1;
         // do not collide with top
@@ -42,7 +51,11 @@ export class Cannon extends Scene {
         this.ball = this.physics.add
             .image(x0, y0, "cannonball")
             .setScale(0.4)
-            .setCollideWorldBounds(true, 0.5, 0.5);
+            .setCollideWorldBounds(true, 0.5, 0.5, true);
+        this.physics.world.on("worldbounds", () => {
+            console.log("worldboudns");
+            return this.sound.play("cannon-hit", { volume: 0.1 });
+        });
         this.ball.body.setAllowGravity(false);
         this.target = this.add.rectangle(1000, y0, 100, 10, 0x00ff00);
         this.physics.add.existing(this.target, true);
@@ -105,6 +118,7 @@ export class Cannon extends Scene {
             v.setAngle(-this.angle);
             this.ball.setVelocity(v.x, v.y);
             this.ball.body.setAllowGravity(true);
+            this.sound.play("cannon-shot", { volume: 0.2 });
         }
     }
 
