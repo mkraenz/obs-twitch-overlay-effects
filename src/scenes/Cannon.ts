@@ -1,13 +1,18 @@
-import { GameObjects, Scene, Types } from "phaser";
+import { GameObjects, Physics, Scene, Types } from "phaser";
 
 const x0 = 100;
 const y0 = 500;
 const minSpeed = 250;
-const maxSpeed = 700;
+const maxSpeed = 1000;
 const maxAngle = Math.PI / 2;
 const angleStep = 0.0174 * 5; // roughly 1 degree in radians
 const speedStep = 50;
-const resetTime = 3000;
+const resetTime = 20000;
+const maxWallBouncesPerBall = 4;
+
+type Cannonball = Types.Physics.Arcade.ImageWithDynamicBody & {
+    totalBounces: number;
+};
 
 export const cannonCommands = [
     "!up",
@@ -23,10 +28,9 @@ type Commands = typeof cannonCommands[number];
 export class Cannon extends Scene {
     private angle = 0; // 0 to 90 degrees
     private speed = minSpeed;
-    // TODO multiple cannonballs
-    private ball!: Types.Physics.Arcade.ImageWithDynamicBody;
+    // each ball has type Types.Physics.Arcade.ImageWithDynamicBody
+    private balls!: Physics.Arcade.Group;
     private target!: GameObjects.Rectangle;
-    private state: "aiming" | "flying" = "aiming";
     private speedBar!: GameObjects.Rectangle;
     private resultText!: GameObjects.Text;
     private cannonPipe!: GameObjects.Image;
@@ -48,19 +52,33 @@ export class Cannon extends Scene {
         this.physics.world.gravity.y = 98.1;
         // do not collide with top
         this.physics.world.setBoundsCollision(true, true, false, true);
-        this.ball = this.physics.add
-            .image(x0, y0, "cannonball")
-            .setScale(0.4)
-            .setCollideWorldBounds(true, 0.5, 0.5, true);
-        this.physics.world.on("worldbounds", () => {
-            console.log("worldboudns");
-            return this.sound.play("cannon-hit", { volume: 0.1 });
+        this.physics.world.on("worldbounds", (collidingObjBody: any) => {
+            if (collidingObjBody.gameObject?.texture?.key === "cannonball") {
+                const collidingBall = collidingObjBody.gameObject as Cannonball;
+                collidingBall.totalBounces += 1;
+                this.sound.play("cannon-hit", {
+                    volume: Math.max(
+                        (0.1 *
+                            (maxWallBouncesPerBall -
+                                collidingBall.totalBounces)) /
+                            maxWallBouncesPerBall,
+                        0
+                    ),
+                });
+            }
         });
-        this.ball.body.setAllowGravity(false);
+        this.balls = this.physics.add.group({
+            collideWorldBounds: true,
+            bounceX: 0.5,
+            bounceY: 0.5,
+            "setDepth.value": 300,
+        });
         this.target = this.add.rectangle(1000, y0, 100, 10, 0x00ff00);
         this.physics.add.existing(this.target, true);
-        this.physics.add.collider(this.ball, this.target, () => {
-            this.resultText.setVisible(true);
+        this.target.setVisible(false); // TODO whats the actual goal?
+        this.physics.add.collider(this.balls, this.target, () => {
+            // this.resultText.setVisible(true); // TODO handle winning
+            this.resultText.setVisible(false);
         });
         this.resultText = this.add
             .text(100, 150, "HIT!", {
@@ -75,8 +93,9 @@ export class Cannon extends Scene {
             .image(x0, y0 + 20 - 17, "cannon-pipe")
             .setFlipX(true)
             .setOrigin(0.5, 1)
+            .setDepth(301)
             .setRotation(Math.PI / 2); // start lying flat
-        this.add.image(x0, y0 - 17, "cannon-stand");
+        this.add.image(x0, y0 - 17, "cannon-stand").setDepth(301);
         this.redraw();
     }
 
@@ -112,14 +131,25 @@ export class Cannon extends Scene {
     }
 
     private shoot() {
-        if (this.state === "aiming") {
-            this.state = "flying";
-            const v = new Phaser.Math.Vector2(this.speed, 0);
-            v.setAngle(-this.angle);
-            this.ball.setVelocity(v.x, v.y);
-            this.ball.body.setAllowGravity(true);
-            this.sound.play("cannon-shot", { volume: 0.2 });
-        }
+        const ball: Cannonball = this.balls
+            .create(x0, y0, "cannonball")
+            .setScale(0.35);
+        ball.totalBounces = 0;
+        ball.on("worldbounds", () => {
+            ball.totalBounces += 1;
+            console.log("ball bounced", ball.totalBounces);
+        });
+        ball.body.gameObject = ball;
+        const v = new Phaser.Math.Vector2(this.speed, 0);
+        v.setAngle(-this.angle);
+        ball.setVelocity(v.x, v.y);
+        ball.body.setAllowGravity(true);
+        ball.setCollideWorldBounds(true, 0.5, 0.5, true);
+        this.sound.play("cannon-shot", { volume: 0.2 });
+
+        this.time.delayedCall(resetTime, () =>
+            this.balls.remove(ball, true, true)
+        );
     }
 
     private redraw() {
@@ -136,23 +166,5 @@ export class Cannon extends Scene {
 
     private redrawPipe() {
         this.cannonPipe.setRotation(Math.PI / 2 - this.angle);
-    }
-
-    public update(): void {
-        const landed = this.ball.y >= y0 + 1;
-        if (this.state === "flying" && landed)
-            this.time.delayedCall(resetTime, () => this.reset());
-    }
-
-    private reset() {
-        this.state = "aiming";
-        this.resetBall();
-    }
-
-    private resetBall() {
-        this.ball.setPosition(x0, y0);
-        this.ball.body.setAllowGravity(false);
-        this.ball.setVelocity(0);
-        this.resultText.setVisible(false);
     }
 }
