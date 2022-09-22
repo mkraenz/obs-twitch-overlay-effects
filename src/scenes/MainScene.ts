@@ -6,6 +6,7 @@ import { ChatterTracker } from "../components/ChatterTracker";
 import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
+import { Cannon } from "./Cannon";
 import { CannonShot } from "./CannonShot";
 import { Scenes } from "./Scenes";
 
@@ -30,6 +31,7 @@ export class MainScene extends Scene {
     private cats: Neko[] = [];
     private chatterTracker!: ChatterTracker;
     private cannonShot!: CannonShot;
+    private cannon!: Cannon;
 
     public constructor() {
         super({
@@ -77,8 +79,9 @@ export class MainScene extends Scene {
         this.cannonShot = this.scene.add(
             "CannonShot",
             CannonShot,
-            true
+            false
         ) as CannonShot;
+        this.cannon = this.scene.add("Cannon", Cannon, true) as Cannon;
 
         this.gui = new GUI();
         this.gui.hide();
@@ -95,12 +98,30 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
-            const cannonballMethods = {
+            const cannonballController = {
                 emulateMessage: () => this.cannonShot.handleMessage("Peter"),
             };
             this.gui
-                .add(cannonballMethods, "emulateMessage")
+                .add(cannonballController, "emulateMessage")
                 .name("Cannonball: Emulate Message");
+            const cannonController = {
+                up: () => this.cannon.handleMessage("!up"),
+                down: () => this.cannon.handleMessage("!down"),
+                gravityup: () => this.cannon.handleMessage("!gravityup"),
+                gravitydown: () => this.cannon.handleMessage("!gravitydown"),
+                powerup: () => this.cannon.handleMessage("!powerup"),
+                powerdown: () => this.cannon.handleMessage("!powerdown"),
+                shoot: () => this.cannon.handleMessage("!shoot"),
+            };
+            const cannonFolder = this.gui.addFolder("Cannon");
+            cannonFolder.open();
+            cannonFolder.add(cannonController, "gravityup");
+            cannonFolder.add(cannonController, "gravitydown");
+            cannonFolder.add(cannonController, "up");
+            cannonFolder.add(cannonController, "down");
+            cannonFolder.add(cannonController, "powerup");
+            cannonFolder.add(cannonController, "powerdown");
+            cannonFolder.add(cannonController, "shoot");
         }
     }
 
