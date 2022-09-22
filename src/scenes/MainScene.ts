@@ -7,7 +7,6 @@ import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
 import { Cannon, cannonCommands } from "./Cannon";
-import { CannonShot } from "./CannonShot";
 import { Scenes } from "./Scenes";
 
 const tmiConfig = {
@@ -30,7 +29,6 @@ export class MainScene extends Scene {
     private gui!: GUI;
     private cats: Neko[] = [];
     private chatterTracker!: ChatterTracker;
-    private cannonShot!: CannonShot;
     private cannon!: Cannon;
 
     public constructor() {
@@ -77,11 +75,6 @@ export class MainScene extends Scene {
 
         this.addCats();
         this.chatterTracker = new ChatterTracker(this.cats);
-        this.cannonShot = this.scene.add(
-            "CannonShot",
-            CannonShot,
-            false
-        ) as CannonShot;
         this.cannon = this.scene.add("Cannon", Cannon, true) as Cannon;
 
         this.gui = new GUI();
@@ -99,12 +92,6 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
-            const cannonballController = {
-                emulateMessage: () => this.cannonShot.handleMessage("Peter"),
-            };
-            this.gui
-                .add(cannonballController, "emulateMessage")
-                .name("Cannonball: Emulate Message");
             const cannonController = {
                 up: () => this.cannon.handleMessage("!up"),
                 down: () => this.cannon.handleMessage("!down"),
@@ -226,10 +213,6 @@ export class MainScene extends Scene {
         }
         if (msg.includes("!fanfare")) {
             return this.playFanfare();
-        }
-
-        if (msg.includes("!cannon")) {
-            this.cannonShot.handleMessage(displayName || username);
         }
 
         const cannonballCommand = cannonCommands.find((cmd) =>
