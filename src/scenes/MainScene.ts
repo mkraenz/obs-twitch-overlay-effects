@@ -6,7 +6,7 @@ import { ChatterTracker } from "../components/ChatterTracker";
 import { DiceRoll } from "../components/DiceRoll";
 import { Neko } from "../components/Neko";
 import { DEV } from "../dev-config";
-import { Cannon } from "./Cannon";
+import { Cannon, cannonCommands } from "./Cannon";
 import { CannonShot } from "./CannonShot";
 import { Scenes } from "./Scenes";
 
@@ -61,6 +61,7 @@ export class MainScene extends Scene {
                 textureURL: "images/midori.png",
                 atlasURL: "images/ao.json",
             })
+            .image("cannonball", "images/cannonball.png")
             .image("cannon-pipe", "images/cannon-pipe.png")
             .image("cannon-stand", "images/cannon-stand.png");
         otherStaticPaths = {
@@ -229,6 +230,13 @@ export class MainScene extends Scene {
 
         if (msg.includes("!cannon")) {
             this.cannonShot.handleMessage(displayName || username);
+        }
+
+        const cannonballCommand = cannonCommands.find((cmd) =>
+            msg.startsWith(cmd)
+        );
+        if (cannonballCommand) {
+            this.cannon.handleMessage(cannonballCommand);
         }
 
         if (msg.includes("!slash") || msg.includes("!slice"))

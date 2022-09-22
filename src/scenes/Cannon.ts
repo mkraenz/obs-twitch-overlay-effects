@@ -1,15 +1,15 @@
-import { GameObjects, Scene } from "phaser";
+import { GameObjects, Scene, Types } from "phaser";
 
 const x0 = 100;
 const y0 = 500;
-const minSpeed = 100;
-const maxSpeed = 150;
+const minSpeed = 250;
+const maxSpeed = 700;
 const maxAngle = Math.PI / 2;
 const angleStep = 0.0174 * 5; // roughly 1 degree in radians
-const speedStep = 5;
+const speedStep = 50;
 const resetTime = 3000;
 
-export const commands = [
+export const cannonCommands = [
     "!up",
     "!down",
     "!powerup",
@@ -18,15 +18,14 @@ export const commands = [
     "!gravityup",
     "!gravitydown",
 ] as const;
-type Commands = typeof commands[number];
+type Commands = typeof cannonCommands[number];
 
 export class Cannon extends Scene {
-    private g = 9.81;
     private angle = 0; // 0 to 90 degrees
     private speed = minSpeed;
-    private ball!: GameObjects.Arc;
+    // TODO multiple cannonballs
+    private ball!: Types.Physics.Arcade.ImageWithDynamicBody;
     private target!: GameObjects.Rectangle;
-    private tFlying = 0;
     private state: "aiming" | "flying" = "aiming";
     private speedBar!: GameObjects.Rectangle;
     private resultText!: GameObjects.Text;
@@ -37,10 +36,16 @@ export class Cannon extends Scene {
     }
 
     public create() {
-        this.ball = this.add.circle(x0, y0, 10, 0xff0000);
-        this.physics.add.existing(this.ball);
+        this.physics.world.gravity.y = 98.1;
+        // do not collide with top
+        this.physics.world.setBoundsCollision(true, true, false, true);
+        this.ball = this.physics.add
+            .image(x0, y0, "cannonball")
+            .setScale(0.4)
+            .setCollideWorldBounds(true, 0.5, 0.5);
+        this.ball.body.setAllowGravity(false);
         this.target = this.add.rectangle(1000, y0, 100, 10, 0x00ff00);
-        this.physics.add.existing(this.target);
+        this.physics.add.existing(this.target, true);
         this.physics.add.collider(this.ball, this.target, () => {
             this.resultText.setVisible(true);
         });
@@ -57,7 +62,7 @@ export class Cannon extends Scene {
             .image(x0, y0 + 20 - 17, "cannon-pipe")
             .setFlipX(true)
             .setOrigin(0.5, 1)
-            .setRotation(Math.PI / 2); // start lying
+            .setRotation(Math.PI / 2); // start lying flat
         this.add.image(x0, y0 - 17, "cannon-stand");
         this.redraw();
     }
@@ -80,17 +85,27 @@ export class Cannon extends Scene {
                 this.shoot();
                 break;
             case "!gravityup":
-                this.g += 3;
+                this.increaseGravityY(3);
                 break;
             case "!gravitydown":
-                this.g -= 3;
+                this.increaseGravityY(-3);
                 break;
         }
         this.redraw();
     }
 
+    private increaseGravityY(amount: number) {
+        this.physics.world.gravity.y += amount;
+    }
+
     private shoot() {
-        if (this.state === "aiming") this.state = "flying";
+        if (this.state === "aiming") {
+            this.state = "flying";
+            const v = new Phaser.Math.Vector2(this.speed, 0);
+            v.setAngle(-this.angle);
+            this.ball.setVelocity(v.x, v.y);
+            this.ball.body.setAllowGravity(true);
+        }
     }
 
     private redraw() {
@@ -109,23 +124,7 @@ export class Cannon extends Scene {
         this.cannonPipe.setRotation(Math.PI / 2 - this.angle);
     }
 
-    // https://de.wikipedia.org/wiki/Wurfparabel
-    // x(t) = v0 * cos(alpha) * t
-    // y(t) = v0 * sin(alpha) * t - 1/2 * g * t^2
-    public update(timeSinceStart: number, delta: number): void {
-        console.log(this.g);
-        const inTheAir = this.ball.y <= y0 + 1;
-        if (this.state === "flying" && inTheAir) {
-            this.tFlying += delta / 100;
-            const xt = x0 + this.speed * Math.cos(this.angle) * this.tFlying;
-            const yt =
-                y0 -
-                (this.speed * Math.sin(this.angle) * this.tFlying -
-                    0.5 * this.g * Math.pow(this.tFlying, 2));
-            this.ball.setX(xt);
-            this.ball.setY(yt);
-        }
-
+    public update(): void {
         const landed = this.ball.y >= y0 + 1;
         if (this.state === "flying" && landed)
             this.time.delayedCall(resetTime, () => this.reset());
@@ -138,7 +137,8 @@ export class Cannon extends Scene {
 
     private resetBall() {
         this.ball.setPosition(x0, y0);
-        this.tFlying = 0;
+        this.ball.body.setAllowGravity(false);
+        this.ball.setVelocity(0);
         this.resultText.setVisible(false);
     }
 }
