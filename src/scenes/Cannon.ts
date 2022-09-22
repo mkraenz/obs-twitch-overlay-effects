@@ -1,6 +1,6 @@
 import { GameObjects, Physics, Scene, Types } from "phaser";
 
-const x0 = 100;
+const x0 = 5;
 const y0 = 500;
 const minSpeed = 250;
 const maxSpeed = 1000;
@@ -27,7 +27,7 @@ type Commands = typeof cannonCommands[number];
 
 export class Cannon extends Scene {
     private angle = 0; // 0 to 90 degrees
-    private speed = minSpeed;
+    private speed = (maxSpeed - minSpeed) / 2 + minSpeed;
     // each ball has type Types.Physics.Arcade.ImageWithDynamicBody
     private balls!: Physics.Arcade.Group;
     private target!: GameObjects.Rectangle;
@@ -88,14 +88,18 @@ export class Cannon extends Scene {
             .setVisible(false);
         this.speedBar = this.add
             .rectangle(300, 50, 200, 48, 0x00ff00)
-            .setOrigin(0, 0.5);
+            .setOrigin(0, 0.5)
+            .setVisible(false); // TODO how to display speed?
         this.cannonPipe = this.add
             .image(x0, y0 + 20 - 17, "cannon-pipe")
             .setFlipX(true)
             .setOrigin(0.5, 1)
             .setDepth(301)
             .setRotation(Math.PI / 2); // start lying flat
-        this.add.image(x0, y0 - 17, "cannon-stand").setDepth(301);
+        this.add
+            .image(x0 + 20, y0 + 2, "cannon-stand")
+            .setDepth(301)
+            .setRotation(Math.PI / 2);
         this.redraw();
     }
 
