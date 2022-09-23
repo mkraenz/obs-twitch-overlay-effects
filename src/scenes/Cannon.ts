@@ -13,7 +13,7 @@ const speedStep = 50;
 const resetTime = ms("20 seconds");
 const maxWallBouncesPerBall = 4;
 const minTimeToBug = ms("5 seconds");
-const maxTimeToBug = ms("5 minutes");
+const maxTimeToBug = ms("5 seconds");
 const timeToDestroyText = 7000;
 
 type Cannonball = Types.Physics.Arcade.ImageWithDynamicBody & {
@@ -52,6 +52,7 @@ export class Cannon extends Scene {
             .image("cannon-stand", "images/cannon-stand.png")
             .image("bug", "images/bug.png")
             .audio("oh-yeah", "sounds/oh-yeah.mp3")
+            .audio("splat", "sounds/splat.mp3")
             .audio("cannon-shot", "sounds/cannon_fire.mp3")
             .audio("cannon-hit", "sounds/cannon_hit_wall_no_splash.mp3");
     }
@@ -88,6 +89,8 @@ export class Cannon extends Scene {
 
             bug.destroy();
             this.scheduleCreateBug();
+
+            this.sound.play("splat", { volume: 0.4 });
 
             const text = this.add
                 .text(
