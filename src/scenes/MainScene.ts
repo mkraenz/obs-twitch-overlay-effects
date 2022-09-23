@@ -1,4 +1,5 @@
 import { GUI } from "dat.gui";
+import { sample } from "lodash";
 import ms from "ms";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
@@ -90,6 +91,7 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
+            aoGui.add(this.cats[0], "sayIUseArchBtw");
             const tstt = "TypeScriptTeatime";
             const cannonController = {
                 up: () => this.cannon.handleMessage("!up", tstt),
@@ -234,6 +236,14 @@ export class MainScene extends Scene {
 
         if (msg.includes("!ohyeah")) {
             return this.sound.play("oh-yeah", { volume: 0.2 });
+        }
+
+        if (msg.includes("!cheezburger")) {
+            this.cats[1].sayCheezburger();
+        }
+
+        if (msg.includes("!btw") || msg.includes("!arch")) {
+            sample(this.cats)!.sayIUseArchBtw();
         }
 
         if (

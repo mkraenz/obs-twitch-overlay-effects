@@ -24,6 +24,7 @@
         "@types/tmi.js": "^1.8.1",
         "dat.gui": "^0.7.9",
         "phaser-plugin-scene-watcher": "^6.0.0",
+        "replace-color": "^2.3.0",
         "typescript": "^4.6.4",
         "vite": "^3.0.7"
     }

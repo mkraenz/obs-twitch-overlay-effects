@@ -9,6 +9,7 @@ type AnimationKey =
     | "dance"
     | "eyes"
     | "talk"
+    | "laptop"
     | "sit"
     | "sit-sherlock"
     | "blush"
@@ -24,6 +25,7 @@ const anims: AnimationKey[] = [
     "laugh",
     "dance",
     "eyes",
+    "laptop",
     "sit",
     "sit-sherlock",
     "blush",
@@ -137,6 +139,10 @@ export class Neko extends GameObjects.Sprite {
         this.say("I Can Has Cheezburger?");
     }
 
+    public sayIUseArchBtw() {
+        this.say("I use Arch btw", { key: "laptop", keyEnd: "laptop" });
+    }
+
     private playBlockingAnim(options: AnimationConfig & { duration: number }) {
         this.isInBlockingAnimation = true;
         this.playAnim(options);
@@ -145,8 +151,19 @@ export class Neko extends GameObjects.Sprite {
         });
     }
 
-    private say(phrase: string, options?: { autoRemove?: boolean }) {
-        const { autoRemove = true } = options || {};
+    private say(
+        phrase: string,
+        options?: {
+            autoRemove?: boolean;
+            key?: AnimationKey;
+            keyEnd?: AnimationKey;
+        }
+    ) {
+        const {
+            autoRemove = true,
+            key = "talk",
+            keyEnd = "idle",
+        } = options || {};
         const text = this.scene.add
             .text(this.x, this.y - 200, "", TextConfig.text)
             .setOrigin(0.5, 0);
@@ -159,7 +176,7 @@ export class Neko extends GameObjects.Sprite {
             to,
             onStart: () => {
                 this.isInBlockingAnimation = true;
-                this.playAnim({ key: "talk" });
+                this.playAnim({ key });
             },
             onComplete: () => {
                 this.isInBlockingAnimation = false;
@@ -168,7 +185,7 @@ export class Neko extends GameObjects.Sprite {
             onUpdate: (_, { value }: { value: number }) => {
                 text.setText(phrase.substring(0, Math.floor(value)));
                 if (Math.ceil(value) === to) {
-                    this.playAnim({ key: "idle" });
+                    this.playAnim({ key: keyEnd });
                 }
             },
             hold: Cfg.greetingHoldDuration,

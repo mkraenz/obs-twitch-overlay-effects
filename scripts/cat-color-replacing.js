@@ -1,4 +1,4 @@
-import replaceColor from "replace-color-ts";
+const replaceColor = require("replace-color");
 
 const main = async () => {
     // light blue-> light green
