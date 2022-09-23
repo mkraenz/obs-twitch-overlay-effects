@@ -44,6 +44,7 @@ export class MainScene extends Scene {
             .text("starshower-effect", "particles/starshower.json")
             .audio("fanfare", "sounds/teawars-fanfare.mp3")
             .audio("diceroll", "sounds/diceroll.mp3")
+            .audio("oh-yeah", "sounds/oh-yeah.mp3")
             .aseprite({
                 key: "ao",
                 textureURL: "images/ao.png",
@@ -229,6 +230,10 @@ export class MainScene extends Scene {
 
         if (msg.includes("!css")) {
             return this.addCssFamilyGuy();
+        }
+
+        if (msg.includes("!ohyeah")) {
+            return this.sound.play("oh-yeah", { volume: 0.2 });
         }
 
         if (

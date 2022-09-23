@@ -51,7 +51,6 @@ export class Cannon extends Scene {
             .image("cannon-pipe", "images/cannon-pipe.png")
             .image("cannon-stand", "images/cannon-stand.png")
             .image("bug", "images/bug.png")
-            .audio("oh-yeah", "sounds/oh-yeah.mp3")
             .audio("splat", "sounds/splat.mp3")
             .audio("cannon-shot", "sounds/cannon_fire.mp3")
             .audio("cannon-hit", "sounds/cannon_hit_wall_no_splash.mp3");
