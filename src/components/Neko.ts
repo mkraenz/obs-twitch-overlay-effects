@@ -1,6 +1,7 @@
 import { random, sample } from "lodash";
 import ms from "ms";
 import { GameObjects, Scene, Types } from "phaser";
+import { setTextShadowMd, TextConfig } from "../styles/TextConfig";
 
 type AnimationKey =
     | "idle"
@@ -147,14 +148,9 @@ export class Neko extends GameObjects.Sprite {
     private say(phrase: string, options?: { autoRemove?: boolean }) {
         const { autoRemove = true } = options || {};
         const text = this.scene.add
-            .text(this.x, this.y - 200, "", {
-                fontFamily: "PressStart2P",
-                fontSize: "32px",
-                color: "white",
-            })
+            .text(this.x, this.y - 200, "", TextConfig.text)
             .setOrigin(0.5, 0);
-        text.setStroke("black", 16);
-        text.setShadow(2, 2, "#333333", 2, false, false);
+        setTextShadowMd(text);
 
         const to = phrase.length;
         this.scene.tweens.addCounter({

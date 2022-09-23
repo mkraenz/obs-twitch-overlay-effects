@@ -89,14 +89,16 @@ export class MainScene extends Scene {
             const aoGui = this.gui.addFolder("Ao");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
+            const tstt = "TypeScriptTeatime";
             const cannonController = {
-                up: () => this.cannon.handleMessage("!up"),
-                down: () => this.cannon.handleMessage("!down"),
-                gravityup: () => this.cannon.handleMessage("!gravityup"),
-                gravitydown: () => this.cannon.handleMessage("!gravitydown"),
-                powerup: () => this.cannon.handleMessage("!powerup"),
-                powerdown: () => this.cannon.handleMessage("!powerdown"),
-                shoot: () => this.cannon.handleMessage("!shoot"),
+                up: () => this.cannon.handleMessage("!up", tstt),
+                down: () => this.cannon.handleMessage("!down", tstt),
+                gravityup: () => this.cannon.handleMessage("!gravityup", tstt),
+                gravitydown: () =>
+                    this.cannon.handleMessage("!gravitydown", tstt),
+                powerup: () => this.cannon.handleMessage("!powerup", tstt),
+                powerdown: () => this.cannon.handleMessage("!powerdown", tstt),
+                shoot: () => this.cannon.handleMessage("!shoot", tstt),
             };
             const cannonFolder = this.gui.addFolder("Cannon");
             cannonFolder.open();
@@ -216,7 +218,10 @@ export class MainScene extends Scene {
             msg.startsWith(cmd)
         );
         if (cannonballCommand) {
-            this.cannon.handleMessage(cannonballCommand);
+            this.cannon.handleMessage(
+                cannonballCommand,
+                displayName || username
+            );
         }
 
         if (msg.includes("!slash") || msg.includes("!slice"))
