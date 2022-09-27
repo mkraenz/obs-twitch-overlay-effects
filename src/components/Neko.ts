@@ -14,6 +14,7 @@ type AnimationKey =
     | "sit-sherlock"
     | "blush"
     | "oh"
+    | "confused"
     | "ohno";
 
 type AnimationConfig = Omit<Types.Animations.PlayAnimationConfig, "key"> & {
@@ -148,6 +149,13 @@ export class Neko extends GameObjects.Sprite {
         this.playAnim(options);
         this.scene.time.delayedCall(options.duration, () => {
             this.isInBlockingAnimation = false;
+        });
+    }
+
+    public beConfused() {
+        this.playBlockingAnim({
+            key: "confused",
+            duration: 10000,
         });
     }
 

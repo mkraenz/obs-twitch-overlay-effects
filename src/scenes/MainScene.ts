@@ -1,5 +1,5 @@
 import { GUI } from "dat.gui";
-import { sample } from "lodash";
+import { random, sample } from "lodash";
 import ms from "ms";
 import { Scene } from "phaser";
 import { ChatUserstate, Client } from "tmi.js";
@@ -88,10 +88,11 @@ export class MainScene extends Scene {
             this.gui.add(this, "playFanfare");
             this.gui.add(this, "debugRollDice");
             this.gui.add(this, "debugSayHi");
-            const aoGui = this.gui.addFolder("Ao");
+            const aoGui = this.gui.addFolder("Neko");
             aoGui.add(this.cats[0], "beShocked");
             aoGui.add(this.cats[0], "sayGoodbye");
             aoGui.add(this.cats[0], "sayIUseArchBtw");
+            aoGui.add(this.cats[1], "beConfused");
             const tstt = "TypeScriptTeatime";
             const cannonController = {
                 up: () => this.cannon.handleMessage("!up", tstt),
@@ -124,21 +125,21 @@ export class MainScene extends Scene {
             new Neko(
                 this,
                 this.scale.width / 2 + 150,
-                this.scale.height - 132,
+                this.scale.height - 132 - 30,
                 "ao",
                 { viewDirection: "right" }
             ),
             new Neko(
                 this,
                 this.scale.width / 2 + 260,
-                this.scale.height - 150,
+                this.scale.height - 150 - 30,
                 "midori",
                 { scale: 2.9, lovesCheezburger: true }
             ),
             new Neko(
                 this,
                 this.scale.width / 2 + 350,
-                this.scale.height - 130,
+                this.scale.height - 130 - 30,
                 "pink"
             )
         );
@@ -240,6 +241,17 @@ export class MainScene extends Scene {
 
         if (msg.includes("!cheezburger")) {
             this.cats[1].sayCheezburger();
+        }
+
+        /** TODO for whatever reason OBS doesn't work with this, even when triggered from dat.GUI */
+        if (
+            msg.includes("!?") ||
+            msg.includes("?!") ||
+            msg.includes("!question") ||
+            msg.includes("!confused")
+        ) {
+            // don't confuse ao because she's flipped and the questionmarks would render weirdly
+            this.cats[random(1, 2)].beConfused();
         }
 
         if (msg.includes("!btw") || msg.includes("!arch")) {
