@@ -13,7 +13,7 @@ const speedStep = 50;
 const resetTime = ms("20 seconds");
 const maxWallBouncesPerBall = 4;
 const minTimeToBug = ms("5 seconds");
-const maxTimeToBug = ms("5 seconds");
+const maxTimeToBug = ms("5 minutes");
 const timeToDestroyText = 7000;
 
 type Cannonball = Types.Physics.Arcade.ImageWithDynamicBody & {
@@ -85,7 +85,6 @@ export class Cannon extends Scene {
 
         this.physics.add.overlap(this.balls, this.bugs, (ball1, bug) => {
             const ball = ball1 as Cannonball;
-
             bug.destroy();
             this.scheduleCreateBug();
 
