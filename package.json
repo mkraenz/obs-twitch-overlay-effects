@@ -7,7 +7,7 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "generate:cats": "ts-node ./scripts/cat-color-replacing.ts"
+        "generate:cats": "node ./scripts/cat-color-replacing.js"
     },
     "dependencies": {
         "lodash": "^4.17.21",
